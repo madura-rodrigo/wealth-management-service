@@ -24,6 +24,7 @@
 
 ## Description
 
+REST service to manage individual wealth. Curruntly it is support only for securities owned by an individual in Colombo Stock Exchange(CSE - Sri Lanka).
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
