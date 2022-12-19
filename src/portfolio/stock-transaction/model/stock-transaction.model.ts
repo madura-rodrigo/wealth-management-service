@@ -1,4 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument } from 'mongoose';
+
+export type StockTransactionDocument = HydratedDocument<StockTransaction>;
 
 @Schema()
 export class StockTransaction {
@@ -16,6 +19,8 @@ export class StockTransaction {
 
   @Prop({ type: Number, required: true })
   tradedPrice: number;
+
+  commison: number;
 }
 
 export const StockTransactionSchema =

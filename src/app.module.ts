@@ -6,7 +6,7 @@ import { DataModule } from './data/data.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MongooseConfigService } from 'config/databse.config';
+import { MongooseConfigService } from '../config/databse.config';
 
 @Module({
   imports: [

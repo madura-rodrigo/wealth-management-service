@@ -3,8 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   StockTransaction,
   StockTransactionSchema,
-} from '../model/stock-transaction.model';
+} from './model/stock-transaction.model';
 import { StockTransactionService } from './stock-transaction.service';
+import {
+  COMMISON_CALCULATOR,
+  CSECommisonCalculator,
+} from './utilities/commison-calcuater';
 
 @Module({
   imports: [
@@ -12,7 +16,10 @@ import { StockTransactionService } from './stock-transaction.service';
       { name: StockTransaction.name, schema: StockTransactionSchema },
     ]),
   ],
-  providers: [StockTransactionService],
+  providers: [
+    StockTransactionService,
+    { provide: COMMISON_CALCULATOR, useClass: CSECommisonCalculator },
+  ],
   exports: [StockTransactionService],
 })
 export class StockTransactionModule {}

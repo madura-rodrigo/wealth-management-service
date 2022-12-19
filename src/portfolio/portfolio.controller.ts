@@ -6,7 +6,6 @@ import {
   ParseEnumPipe,
   Post,
 } from '@nestjs/common';
-import { type } from 'os';
 import { DividentService } from './divident/divident.service';
 import { CreateDividentDto } from './divident/dto/create-divident.dto';
 import { TransactionType } from './enum/transaction-type.enum';
@@ -17,6 +16,7 @@ import { Divident } from './model/divident.model';
 import { Investment } from './model/investment.model';
 import { PortfolioService } from './portfolio.service';
 import { CreateStockTransactionDto } from './stock-transaction/dto/create-stock-transaction.dto';
+import { StockTransactionResponse } from './stock-transaction/dto/stock-transaction-response.dto';
 import { StockTransactionService } from './stock-transaction/stock-transaction.service';
 
 @Controller('portfolio')
@@ -46,12 +46,17 @@ export class PortfolioController {
     return this.dividentService.add(dto);
   }
 
-  @Post(':transaction')
+  @Post('/transactions/:transaction')
   async addTransaction(
     @Param('transaction', new ParseEnumPipe(TransactionType))
     transaction: string,
     @Body() dto: CreateStockTransactionDto,
   ) {
     this.stockTransactionService.add(transaction, dto);
+  }
+
+  @Get('/transactions')
+  async getTransactions(): Promise<StockTransactionResponse[]> {
+    return await this.stockTransactionService.get();
   }
 }
