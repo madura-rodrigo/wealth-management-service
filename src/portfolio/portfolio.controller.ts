@@ -2,10 +2,16 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   ParseEnumPipe,
   Post,
 } from '@nestjs/common';
+import {
+  ExternalDataService,
+  EXTERNAL_DATA_SERVICE,
+} from 'src/external-data-service/external-data.service';
+import { DailySecurityInfo } from 'src/external-data-service/model/daily-security-info.model';
 import { DividentService } from './divident/divident.service';
 import { CreateDividentDto } from './divident/dto/create-divident.dto';
 import { TransactionType } from './enum/transaction-type.enum';
@@ -17,6 +23,7 @@ import { Investment } from './model/investment.model';
 import { PortfolioService } from './portfolio.service';
 import { CreateStockTransactionDto } from './stock-transaction/dto/create-stock-transaction.dto';
 import { StockTransactionResponse } from './stock-transaction/dto/stock-transaction-response.dto';
+import { SecurityIdValidationPipe } from './stock-transaction/pipe/security-id-validation.pipe';
 import { StockTransactionService } from './stock-transaction/stock-transaction.service';
 
 @Controller('portfolio')
@@ -26,6 +33,8 @@ export class PortfolioController {
     private readonly investmentServie: InvestmentService,
     private readonly dividentService: DividentService,
     private readonly stockTransactionService: StockTransactionService,
+    @Inject(EXTERNAL_DATA_SERVICE)
+    private readonly extDataService: ExternalDataService,
   ) {}
 
   @Get()
@@ -56,7 +65,19 @@ export class PortfolioController {
   }
 
   @Get('/transactions')
-  async getTransactions(): Promise<StockTransactionResponse[]> {
-    return await this.stockTransactionService.get();
+  async findAll(): Promise<StockTransactionResponse[]> {
+    return await this.stockTransactionService.findAll();
+  }
+
+  @Get('/transactions/:id')
+  async findById(
+    @Param('id', SecurityIdValidationPipe) id: string,
+  ): Promise<StockTransactionResponse[]> {
+    return await this.stockTransactionService.findById(id);
+  }
+
+  @Get('/ext-data')
+  async getExtData(): Promise<DailySecurityInfo[]> {
+    return await this.extDataService.fetchAllSecurityDataFromExchange();
   }
 }

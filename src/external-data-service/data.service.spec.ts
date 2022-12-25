@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DataService } from './data.service';
+import { DataService } from './external-data.service';
 
 describe('DataService', () => {
   let service: DataService;

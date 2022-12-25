@@ -36,27 +36,21 @@ export class StockTransactionService {
 
   delete() {}
 
-  get(): Promise<StockTransactionResponse[]> {
-    return this.findAllTransactions();
-  }
-
-  findAllTransactions(): Promise<StockTransactionResponse[]> {
+  findAll(): Promise<StockTransactionResponse[]> {
     return this.stockTransactionModel
       .find()
       .distinct('securityId')
       .then(async (securityIds) => {
         let allTransactions: StockTransactionResponse[] = [];
         for (const id of securityIds) {
-          const arr = await this.findTransactionsById(id);
+          const arr = await this.findById(id);
           allTransactions = allTransactions.concat(arr);
         }
         return allTransactions;
       });
   }
 
-  async findTransactionsById(
-    securityId: string,
-  ): Promise<StockTransactionResponse[]> {
+  async findById(securityId: string): Promise<StockTransactionResponse[]> {
     const transactionsbyId = await this.stockTransactionModel.find({
       securityId,
     });
