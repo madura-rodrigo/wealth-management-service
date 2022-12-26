@@ -55,8 +55,8 @@ export class CSECommisonCalculator implements CommisonCalculator {
             } else {
               stktxnResponse.commison =
                 ((item.tradedPrice * item.quantity) / 100) * totalCommision;
-              transactionsResponse.push(stktxnResponse);
             }
+            transactionsResponse.push(stktxnResponse);
           }
         });
       } else {

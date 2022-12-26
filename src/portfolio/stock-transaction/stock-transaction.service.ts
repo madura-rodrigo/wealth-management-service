@@ -11,6 +11,8 @@ import {
   CommisonCalculator,
   COMMISON_CALCULATOR,
 } from './utilities/commison-calcuater';
+import { TransactionType } from '../enum/transaction-type.enum';
+import { StockSummaryResponseDto } from './dto/stock-summary-response.dto';
 
 @Injectable()
 export class StockTransactionService {
@@ -55,6 +57,34 @@ export class StockTransactionService {
       securityId,
     });
     return this.commisonCalculator.calculate(transactionsbyId);
+  }
+
+  async getSummarybySecurityId(id: string): Promise<StockSummaryResponseDto> {
+    const transactions = await this.findById(id);
+
+    const summary = transactions.reduce(
+      (transactionsSummary: StockSummaryResponseDto, item) => {
+        if (item.type === TransactionType.BUY) {
+          transactionsSummary.buyingCost +=
+            item.tradedPrice * item.quantity + item?.commison;
+          transactionsSummary.avialableQuantity += item.quantity;
+        } else {
+          transactionsSummary.sellingIncome +=
+            item.tradedPrice * item.quantity - item?.commison;
+          transactionsSummary.avialableQuantity -= item.quantity;
+        }
+
+        return transactionsSummary;
+      },
+      new StockSummaryResponseDto(0, 0, 0, 0),
+    );
+
+    summary.securityId = id;
+    summary.name = id;
+    summary.avgCostOfAvialbleQty =
+      (summary.buyingCost - summary.sellingIncome) / summary.avialableQuantity;
+
+    return summary;
   }
 
   // private calculateAvailableQuantity(

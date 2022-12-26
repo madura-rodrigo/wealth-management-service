@@ -22,6 +22,7 @@ import { Divident } from './model/divident.model';
 import { Investment } from './model/investment.model';
 import { PortfolioService } from './portfolio.service';
 import { CreateStockTransactionDto } from './stock-transaction/dto/create-stock-transaction.dto';
+import { StockSummaryResponseDto } from './stock-transaction/dto/stock-summary-response.dto';
 import { StockTransactionResponse } from './stock-transaction/dto/stock-transaction-response.dto';
 import { SecurityIdValidationPipe } from './stock-transaction/pipe/security-id-validation.pipe';
 import { StockTransactionService } from './stock-transaction/stock-transaction.service';
@@ -74,6 +75,13 @@ export class PortfolioController {
     @Param('id', SecurityIdValidationPipe) id: string,
   ): Promise<StockTransactionResponse[]> {
     return await this.stockTransactionService.findById(id);
+  }
+
+  @Get('/transactions/:id/summary')
+  async getSummarybySecurityId(
+    @Param('id', SecurityIdValidationPipe) id: string,
+  ): Promise<StockSummaryResponseDto> {
+    return await this.stockTransactionService.getSummarybySecurityId(id);
   }
 
   @Get('/exchange/securities/light')
