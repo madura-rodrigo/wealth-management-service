@@ -5,6 +5,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { AxiosError } from 'axios';
 import { Model } from 'mongoose';
 import { catchError, firstValueFrom, map, Observable, zip } from 'rxjs';
+import { ExchangeDataLightResponseDto } from '../dto/exchange-data-light-response.dto';
 import { ExternalDataService } from '../external-data.service';
 import {
   DailySecurityInfo,
@@ -19,6 +20,21 @@ export class CSEDataService implements ExternalDataService {
     private readonly securityInfoModel: Model<DailySecurityInfoDocument>,
   ) {}
 
+  async getAllExchangeLighData(): Promise<ExchangeDataLightResponseDto[]> {
+    return await this.securityInfoModel
+      .find()
+      .exec()
+      .then((r) =>
+        r.map((item) => {
+          return new ExchangeDataLightResponseDto(
+            item.symbol,
+            item.name,
+            item.price,
+          );
+        }),
+      );
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_5PM)
   async saveDataFromExchange() {
     console.log('*******Task Start*****');
@@ -27,7 +43,9 @@ export class CSEDataService implements ExternalDataService {
     console.log('*******Task end*****');
   }
 
-  async fetchAllSecurityDataFromExchange(): Promise<DailySecurityInfo[]> {
+  private async fetchAllSecurityDataFromExchange(): Promise<
+    DailySecurityInfo[]
+  > {
     const all = zip([
       this.getSnPSecurities(),
       this.getMainBoardSecurities(),

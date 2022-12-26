@@ -1,6 +1,6 @@
 import {
   ArgumentMetadata,
-  HttpException,
+  BadRequestException,
   HttpStatus,
   Inject,
   Injectable,
@@ -22,13 +22,10 @@ export class SecurityIdValidationPipe<T extends string>
   async transform(value: T, metadata: ArgumentMetadata) {
     const result = await this.extDataService.findSecurityDataById(value);
     if (result === null) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: 'Security id is not valid.',
-        },
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException({
+        status: HttpStatus.BAD_REQUEST,
+        error: 'Security id is not valid.',
+      });
     }
     return value;
   }

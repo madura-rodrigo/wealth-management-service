@@ -7,11 +7,11 @@ import {
   ParseEnumPipe,
   Post,
 } from '@nestjs/common';
+import { ExchangeDataLightResponseDto } from 'src/external-data-service/dto/exchange-data-light-response.dto';
 import {
   ExternalDataService,
   EXTERNAL_DATA_SERVICE,
 } from 'src/external-data-service/external-data.service';
-import { DailySecurityInfo } from 'src/external-data-service/model/daily-security-info.model';
 import { DividentService } from './divident/divident.service';
 import { CreateDividentDto } from './divident/dto/create-divident.dto';
 import { TransactionType } from './enum/transaction-type.enum';
@@ -65,19 +65,19 @@ export class PortfolioController {
   }
 
   @Get('/transactions')
-  async findAll(): Promise<StockTransactionResponse[]> {
+  async findAllSecurityTransactions(): Promise<StockTransactionResponse[]> {
     return await this.stockTransactionService.findAll();
   }
 
   @Get('/transactions/:id')
-  async findById(
+  async findSecurityTransactionsById(
     @Param('id', SecurityIdValidationPipe) id: string,
   ): Promise<StockTransactionResponse[]> {
     return await this.stockTransactionService.findById(id);
   }
 
-  @Get('/ext-data')
-  async getExtData(): Promise<DailySecurityInfo[]> {
-    return await this.extDataService.fetchAllSecurityDataFromExchange();
+  @Get('/exchange/securities/light')
+  async getAllExchangeLightData(): Promise<ExchangeDataLightResponseDto[]> {
+    return await this.extDataService.getAllExchangeLighData();
   }
 }
