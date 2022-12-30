@@ -4,9 +4,12 @@ import {
   Get,
   Inject,
   Param,
+  ParseArrayPipe,
   ParseEnumPipe,
   Post,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ExchangeDataLightResponseDto } from 'src/external-data-service/dto/exchange-data-light-response.dto';
 import {
   ExternalDataService,
@@ -47,6 +50,7 @@ export class PortfolioController {
   }
 
   @Post('/investments')
+  @UseGuards(JwtAuthGuard)
   async addInvestment(@Body() dto: CreateInvestmentDto): Promise<Investment> {
     return this.investmentServie.add(dto);
   }
@@ -70,18 +74,20 @@ export class PortfolioController {
     return await this.stockTransactionService.findAll();
   }
 
+  @Get('/transactions/summary')
+  @UseGuards(JwtAuthGuard)
+  async getSummaryBySecurityIds(
+    @Body('ids', new ParseArrayPipe({ items: String, separator: ',' }))
+    ids: string[],
+  ): Promise<StockSummaryResponseDto[]> {
+    return await this.stockTransactionService.getSummaryBySecurityIds(ids);
+  }
+
   @Get('/transactions/:id')
   async findSecurityTransactionsById(
     @Param('id', SecurityIdValidationPipe) id: string,
   ): Promise<StockTransactionResponse[]> {
     return await this.stockTransactionService.findById(id);
-  }
-
-  @Get('/transactions/:id/summary')
-  async getSummarybySecurityId(
-    @Param('id', SecurityIdValidationPipe) id: string,
-  ): Promise<StockSummaryResponseDto> {
-    return await this.stockTransactionService.getSummarybySecurityId(id);
   }
 
   @Get('/exchange/securities/light')

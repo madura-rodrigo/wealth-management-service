@@ -1,9 +1,9 @@
 import {
   ArgumentMetadata,
-  BadRequestException,
   HttpStatus,
   Inject,
   Injectable,
+  NotFoundException,
   PipeTransform,
 } from '@nestjs/common';
 import {
@@ -22,9 +22,9 @@ export class SecurityIdValidationPipe<T extends string>
   async transform(value: T, metadata: ArgumentMetadata) {
     const result = await this.extDataService.findSecurityDataById(value);
     if (result === null) {
-      throw new BadRequestException({
-        status: HttpStatus.BAD_REQUEST,
-        error: 'Security id is not valid.',
+      throw new NotFoundException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'Security id is not valid.',
       });
     }
     return value;

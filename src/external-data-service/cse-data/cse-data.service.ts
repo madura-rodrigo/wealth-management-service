@@ -1,7 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { AxiosError } from 'axios';
 import { Model } from 'mongoose';
 import { catchError, firstValueFrom, map, Observable, zip } from 'rxjs';
@@ -35,12 +34,9 @@ export class CSEDataService implements ExternalDataService {
       );
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_5PM)
   async saveDataFromExchange() {
-    console.log('*******Task Start*****');
     const fetchedData = await this.fetchAllSecurityDataFromExchange();
     await this.securityInfoModel.insertMany(fetchedData);
-    console.log('*******Task end*****');
   }
 
   private async fetchAllSecurityDataFromExchange(): Promise<
@@ -58,6 +54,16 @@ export class CSEDataService implements ExternalDataService {
 
   async findSecurityDataById(securityId: string): Promise<DailySecurityInfo> {
     return await this.securityInfoModel.findOne({ symbol: securityId }).exec();
+  }
+
+  async findSecurityDataByIds(
+    securityIds: string[],
+  ): Promise<DailySecurityInfo[]> {
+    return await this.securityInfoModel
+      .find()
+      .where('symbol')
+      .in(securityIds)
+      .exec();
   }
 
   private getSnPSecurities(): Observable<DailySecurityInfo[]> {

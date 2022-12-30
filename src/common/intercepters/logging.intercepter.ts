@@ -1,6 +1,7 @@
 import {
   CallHandler,
   ExecutionContext,
+  HttpException,
   Injectable,
   Logger,
   NestInterceptor,
@@ -27,20 +28,16 @@ export class LoggingIntercepter implements NestInterceptor {
       tap((res) => {
         const response = context.switchToHttp().getResponse();
         const { statusCode } = response;
-        const contentLength = response.get('content-length');
+        //const contentLength = response.get('content-length');
 
         this.logger.log(
           `${method} ${url}: ${context.getClass().name} ${
             context.getHandler().name
-          } invoke finished. STATUS:${statusCode} ElAPSED_TIME:${
-            Date.now() - now
-          }ms`,
+          } invoke finished. STATUS:${statusCode} +${Date.now() - now}ms`,
         );
       }),
-      catchError((err) => {
-        this.logger.error(
-          `${err} ${err.response.status} ${err.response.error}`,
-        );
+      catchError((err: HttpException) => {
+        this.logger.error(`${err.getStatus()} ${err}`);
         return throwError(() => err);
       }),
     );

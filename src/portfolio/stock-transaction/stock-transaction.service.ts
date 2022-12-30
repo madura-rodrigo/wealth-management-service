@@ -59,32 +59,38 @@ export class StockTransactionService {
     return this.commisonCalculator.calculate(transactionsbyId);
   }
 
-  async getSummarybySecurityId(id: string): Promise<StockSummaryResponseDto> {
-    const transactions = await this.findById(id);
+  async getSummaryBySecurityIds(
+    ids: string[],
+  ): Promise<StockSummaryResponseDto[]> {
+    return Promise.all(
+      ids.map(async (id) => {
+        const transactions = await this.findById(id);
 
-    const summary = transactions.reduce(
-      (transactionsSummary: StockSummaryResponseDto, item) => {
-        if (item.type === TransactionType.BUY) {
-          transactionsSummary.buyingCost +=
-            item.tradedPrice * item.quantity + item?.commison;
-          transactionsSummary.avialableQuantity += item.quantity;
-        } else {
-          transactionsSummary.sellingIncome +=
-            item.tradedPrice * item.quantity - item?.commison;
-          transactionsSummary.avialableQuantity -= item.quantity;
-        }
+        const summary = transactions.reduce(
+          (transactionsSummary: StockSummaryResponseDto, item) => {
+            if (item.type === TransactionType.BUY) {
+              transactionsSummary.buyingCost +=
+                item.tradedPrice * item.quantity + item?.commison;
+              transactionsSummary.avialableQuantity += item.quantity;
+            } else {
+              transactionsSummary.sellingIncome +=
+                item.tradedPrice * item.quantity - item?.commison;
+              transactionsSummary.avialableQuantity -= item.quantity;
+            }
 
-        return transactionsSummary;
-      },
-      new StockSummaryResponseDto(0, 0, 0, 0),
+            return transactionsSummary;
+          },
+          new StockSummaryResponseDto(0, 0, 0, 0),
+        );
+
+        summary.securityId = id;
+        summary.name = id;
+        summary.avgCostOfAvialbleQty =
+          (summary.buyingCost - summary.sellingIncome) /
+          summary.avialableQuantity;
+        return summary;
+      }),
     );
-
-    summary.securityId = id;
-    summary.name = id;
-    summary.avgCostOfAvialbleQty =
-      (summary.buyingCost - summary.sellingIncome) / summary.avialableQuantity;
-
-    return summary;
   }
 
   // private calculateAvailableQuantity(

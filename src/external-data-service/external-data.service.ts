@@ -10,4 +10,6 @@ export interface ExternalDataService {
   saveDataFromExchange();
 
   findSecurityDataById(securityId: string): Promise<DailySecurityInfo>;
+
+  findSecurityDataByIds(securityIds: string[]): Promise<DailySecurityInfo[]>;
 }

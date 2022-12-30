@@ -9,6 +9,9 @@ import { MongooseConfigService } from '../config/databse.config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingIntercepter } from './common/intercepters/logging.intercepter';
+import { TasksService } from './tasks.service';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,10 +20,13 @@ import { LoggingIntercepter } from './common/intercepters/logging.intercepter';
     ScheduleModule.forRoot(),
     ExternalDataModule,
     PortfolioModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    TasksService,
     {
       provide: APP_INTERCEPTOR,
       scope: Scope.REQUEST,
