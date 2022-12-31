@@ -8,8 +8,10 @@ import {
   ParseEnumPipe,
   Post,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { LoggedInUserIntercepter } from 'src/common/intercepters/logged-in-user.intercepter';
 import { ExchangeDataLightResponseDto } from 'src/external-data-service/dto/exchange-data-light-response.dto';
 import {
   ExternalDataService,
@@ -45,22 +47,28 @@ export class PortfolioController {
   getDetailPortfolio() {}
 
   @Get('/summary')
+  @UseGuards(JwtAuthGuard)
   async getPortfolioSummary(): Promise<Summary> {
     return this.portfolioServie.getSummary();
   }
 
   @Post('/investments')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
   async addInvestment(@Body() dto: CreateInvestmentDto): Promise<Investment> {
     return this.investmentServie.add(dto);
   }
 
   @Post('/dividents')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
   async addDivident(@Body() dto: CreateDividentDto): Promise<Divident> {
     return this.dividentService.add(dto);
   }
 
   @Post('/transactions/:transaction')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
   async addTransaction(
     @Param('transaction', new ParseEnumPipe(TransactionType))
     transaction: string,
@@ -70,24 +78,36 @@ export class PortfolioController {
   }
 
   @Get('/transactions')
-  async findAllSecurityTransactions(): Promise<StockTransactionResponse[]> {
-    return await this.stockTransactionService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
+  async findAllSecurityTransactions(
+    @Body('userId') userId: string,
+  ): Promise<StockTransactionResponse[]> {
+    return await this.stockTransactionService.findAll(userId);
   }
 
   @Get('/transactions/summary')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
   async getSummaryBySecurityIds(
     @Body('ids', new ParseArrayPipe({ items: String, separator: ',' }))
     ids: string[],
+    @Body('userId') userId: string,
   ): Promise<StockSummaryResponseDto[]> {
-    return await this.stockTransactionService.getSummaryBySecurityIds(ids);
+    return await this.stockTransactionService.getSummaryBySecurityIds(
+      ids,
+      userId,
+    );
   }
 
   @Get('/transactions/:id')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(LoggedInUserIntercepter)
   async findSecurityTransactionsById(
     @Param('id', SecurityIdValidationPipe) id: string,
+    @Body('userId') userId: string,
   ): Promise<StockTransactionResponse[]> {
-    return await this.stockTransactionService.findById(id);
+    return await this.stockTransactionService.findById(id, userId);
   }
 
   @Get('/exchange/securities/light')

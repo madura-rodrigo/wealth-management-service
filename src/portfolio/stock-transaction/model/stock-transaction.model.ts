@@ -20,6 +20,9 @@ export class StockTransaction {
   @Prop({ type: Number, required: true })
   tradedPrice: number;
 
+  @Prop({ type: String, required: true })
+  userId: string;
+
   commison: number;
 }
 

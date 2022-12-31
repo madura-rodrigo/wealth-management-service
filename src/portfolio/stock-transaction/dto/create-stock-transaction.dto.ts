@@ -16,4 +16,7 @@ export class CreateStockTransactionDto {
 
   @IsNumber()
   tradedPrice: number;
+
+  @IsNotEmpty()
+  userId: string;
 }

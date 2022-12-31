@@ -10,4 +10,7 @@ export class CreateDividentDto {
   @Type(() => Date)
   @IsDate()
   readonly date: Date;
+
+  @IsNotEmpty()
+  readonly userId: string;
 }

@@ -2,6 +2,7 @@ import {
   CallHandler,
   ExecutionContext,
   HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   NestInterceptor,
@@ -36,8 +37,14 @@ export class LoggingIntercepter implements NestInterceptor {
           } invoke finished. STATUS:${statusCode} +${Date.now() - now}ms`,
         );
       }),
-      catchError((err: HttpException) => {
-        this.logger.error(`${err.getStatus()} ${err}`);
+      catchError((err) => {
+        const httpStatus =
+          err instanceof HttpException
+            ? err.getStatus()
+            : HttpStatus.INTERNAL_SERVER_ERROR;
+
+        this.logger.error(`${httpStatus} ${err}`);
+
         return throwError(() => err);
       }),
     );

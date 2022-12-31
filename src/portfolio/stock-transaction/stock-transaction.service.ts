@@ -38,22 +38,26 @@ export class StockTransactionService {
 
   delete() {}
 
-  findAll(): Promise<StockTransactionResponse[]> {
+  findAll(userId: string): Promise<StockTransactionResponse[]> {
     return this.stockTransactionModel
-      .find()
+      .find({ userId })
       .distinct('securityId')
       .then(async (securityIds) => {
         let allTransactions: StockTransactionResponse[] = [];
         for (const id of securityIds) {
-          const arr = await this.findById(id);
+          const arr = await this.findById(id, userId);
           allTransactions = allTransactions.concat(arr);
         }
         return allTransactions;
       });
   }
 
-  async findById(securityId: string): Promise<StockTransactionResponse[]> {
+  async findById(
+    securityId: string,
+    userId: string,
+  ): Promise<StockTransactionResponse[]> {
     const transactionsbyId = await this.stockTransactionModel.find({
+      userId,
       securityId,
     });
     return this.commisonCalculator.calculate(transactionsbyId);
@@ -61,10 +65,11 @@ export class StockTransactionService {
 
   async getSummaryBySecurityIds(
     ids: string[],
+    userId: string,
   ): Promise<StockSummaryResponseDto[]> {
     return Promise.all(
       ids.map(async (id) => {
-        const transactions = await this.findById(id);
+        const transactions = await this.findById(id, userId);
 
         const summary = transactions.reduce(
           (transactionsSummary: StockSummaryResponseDto, item) => {

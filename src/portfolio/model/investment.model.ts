@@ -7,6 +7,9 @@ export class Investment {
 
   @Prop({ type: Date, required: true })
   date: Date;
+
+  @Prop({ type: String, required: true })
+  userId: string;
 }
 
 export const InvestmentSchema = SchemaFactory.createForClass(Investment);

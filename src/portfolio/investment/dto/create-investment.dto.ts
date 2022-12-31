@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateInvestmentDto {
   @IsNumber()
@@ -8,4 +8,7 @@ export class CreateInvestmentDto {
   @Type(() => Date)
   @IsDate()
   readonly date: Date;
+
+  @IsNotEmpty()
+  readonly userId: string;
 }
