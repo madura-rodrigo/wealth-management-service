@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ExternalDataModule } from 'src/external-data-service/external-data.module';
 import {
   StockTransaction,
   StockTransactionSchema,
@@ -15,6 +16,7 @@ import {
     MongooseModule.forFeature([
       { name: StockTransaction.name, schema: StockTransactionSchema },
     ]),
+    ExternalDataModule,
   ],
   providers: [
     StockTransactionService,

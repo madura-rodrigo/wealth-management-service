@@ -12,10 +12,10 @@ export class PortfolioService {
     readonly transactionService: StockTransactionService,
   ) {}
 
-  async getSummary(): Promise<Summary> {
+  async getSummary(userId: string): Promise<Summary> {
     //total investment
     const totalInvestment = await this.investmentService
-      .get()
+      .get(userId)
       .then((invesments) => {
         return invesments
           .map((item) => item.amount)
@@ -23,20 +23,43 @@ export class PortfolioService {
       });
 
     //total divident income
-    const totalDivident = await this.dividentService.get().then((dividents) => {
-      return dividents
-        .map((item) => item.amount)
-        .reduce((previous, current) => previous + current);
-    });
+    const totalDivident = await this.dividentService
+      .get(userId)
+      .then((dividents) => {
+        return dividents
+          .map((item) => item.amount)
+          .reduce((previous, current) => previous + current);
+      });
+
+    //profit or loss
+    const stockSummaries = await this.transactionService
+      .findIds(userId)
+      .then((ids) => {
+        return this.transactionService.getSummaryBySecurityIds(ids, userId);
+      });
+
+    const stocksByingCost = stockSummaries
+      .map((value) => value.buyingCost)
+      .reduce((previous, current) => previous + current);
+    const stocksSellingIncome = stockSummaries
+      .map((value) => value.sellingIncome)
+      .reduce((previous, current) => previous + current);
+
+    const unrealizedProfit = stockSummaries
+      .map((value) => value.unrealizedProfit)
+      .reduce((previous, current) => previous + current);
 
     const summary: Summary = {
       totalInvestment: totalInvestment,
       totalDivident: totalDivident,
-      profit: 5000,
+      realizedMoney: totalDivident + stocksSellingIncome,
+      unrealizedMoney: unrealizedProfit,
+      profit:
+        totalDivident +
+        stocksSellingIncome +
+        unrealizedProfit -
+        stocksByingCost,
     };
-
-    //profit or loss
-
     return summary;
   }
 }

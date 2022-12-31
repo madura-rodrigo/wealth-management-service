@@ -16,8 +16,8 @@ export class DividentService {
     return createdDvident;
   }
 
-  async get(): Promise<Divident[]> {
-    return this.dividientModel.find().exec();
+  async get(userId: string): Promise<Divident[]> {
+    return this.dividientModel.find({ userId }).exec();
   }
 
   async update() {

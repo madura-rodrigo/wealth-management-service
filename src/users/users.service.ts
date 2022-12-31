@@ -12,10 +12,7 @@ export class UsersService {
   ) {}
 
   async findUserByEmail(email: string): Promise<User> {
-    return await this.userModel
-      .findOne({ email: email })
-      .select('-password')
-      .exec();
+    return await this.userModel.findOne({ email: email }).exec();
   }
 
   async create(createUserDto: CreateUserDto) {

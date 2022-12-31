@@ -13,6 +13,10 @@ import {
 } from './utilities/commison-calcuater';
 import { TransactionType } from '../enum/transaction-type.enum';
 import { StockSummaryResponseDto } from './dto/stock-summary-response.dto';
+import {
+  ExternalDataService,
+  EXTERNAL_DATA_SERVICE,
+} from 'src/external-data-service/external-data.service';
 
 @Injectable()
 export class StockTransactionService {
@@ -21,6 +25,8 @@ export class StockTransactionService {
     private readonly stockTransactionModel: Model<StockTransactionDocument>,
     @Inject(COMMISON_CALCULATOR)
     private readonly commisonCalculator: CommisonCalculator,
+    @Inject(EXTERNAL_DATA_SERVICE)
+    private readonly extDataService: ExternalDataService,
   ) {}
 
   async add(
@@ -39,17 +45,21 @@ export class StockTransactionService {
   delete() {}
 
   findAll(userId: string): Promise<StockTransactionResponse[]> {
+    return this.findIds(userId).then(async (securityIds) => {
+      let allTransactions: StockTransactionResponse[] = [];
+      for (const id of securityIds) {
+        const arr = await this.findById(id, userId);
+        allTransactions = allTransactions.concat(arr);
+      }
+      return allTransactions;
+    });
+  }
+
+  async findIds(userId: string): Promise<string[]> {
     return this.stockTransactionModel
       .find({ userId })
       .distinct('securityId')
-      .then(async (securityIds) => {
-        let allTransactions: StockTransactionResponse[] = [];
-        for (const id of securityIds) {
-          const arr = await this.findById(id, userId);
-          allTransactions = allTransactions.concat(arr);
-        }
-        return allTransactions;
-      });
+      .exec();
   }
 
   async findById(
@@ -70,6 +80,7 @@ export class StockTransactionService {
     return Promise.all(
       ids.map(async (id) => {
         const transactions = await this.findById(id, userId);
+        const secInfo = await this.extDataService.findSecurityDataById(id);
 
         const summary = transactions.reduce(
           (transactionsSummary: StockSummaryResponseDto, item) => {
@@ -85,14 +96,20 @@ export class StockTransactionService {
 
             return transactionsSummary;
           },
-          new StockSummaryResponseDto(0, 0, 0, 0),
+          new StockSummaryResponseDto(),
         );
 
         summary.securityId = id;
-        summary.name = id;
+        summary.name = secInfo.name;
+        summary.marketPrice = secInfo.price;
         summary.avgCostOfAvialbleQty =
           (summary.buyingCost - summary.sellingIncome) /
           summary.avialableQuantity;
+        summary.unrealizedProfit =
+          summary.avialableQuantity * secInfo.price -
+          summary.avgCostOfAvialbleQty * summary.avialableQuantity;
+        summary.totalProfit =
+          summary.unrealizedProfit + summary.sellingIncome - summary.buyingCost;
         return summary;
       }),
     );

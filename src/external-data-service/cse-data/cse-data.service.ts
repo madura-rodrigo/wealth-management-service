@@ -36,6 +36,7 @@ export class CSEDataService implements ExternalDataService {
 
   async saveDataFromExchange() {
     const fetchedData = await this.fetchAllSecurityDataFromExchange();
+    await this.securityInfoModel.deleteMany();
     await this.securityInfoModel.insertMany(fetchedData);
   }
 

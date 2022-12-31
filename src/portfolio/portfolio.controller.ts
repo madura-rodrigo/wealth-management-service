@@ -48,8 +48,9 @@ export class PortfolioController {
 
   @Get('/summary')
   @UseGuards(JwtAuthGuard)
-  async getPortfolioSummary(): Promise<Summary> {
-    return this.portfolioServie.getSummary();
+  @UseInterceptors(LoggedInUserIntercepter)
+  async getPortfolioSummary(@Body('userId') userId: string): Promise<Summary> {
+    return this.portfolioServie.getSummary(userId);
   }
 
   @Post('/investments')

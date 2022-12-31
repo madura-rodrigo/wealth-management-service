@@ -18,8 +18,8 @@ export class InvestmentService {
     return createdInvestment;
   }
 
-  async get(): Promise<Investment[]> {
-    return await this.investmentModel.find().exec();
+  async get(userId: string): Promise<Investment[]> {
+    return await this.investmentModel.find({ userId }).exec();
   }
 
   async update() {}

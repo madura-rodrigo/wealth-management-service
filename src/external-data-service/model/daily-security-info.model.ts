@@ -11,7 +11,7 @@ export class DailySecurityInfo {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, unique: true })
   symbol: string;
 
   @Prop({ type: Number })
